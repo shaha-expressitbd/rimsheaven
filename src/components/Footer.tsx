@@ -1,9 +1,8 @@
-import React from 'react'
-import Image from './ui/atoms/image'
+import { Business } from '@/types/business'
 import Link from 'next/link'
 import { FaFacebookF, FaInstagram, FaWhatsapp } from 'react-icons/fa'
 import { RiMessengerLine } from 'react-icons/ri'
-import { Business } from '@/types/business'
+import Image from './ui/atoms/image'
 
 interface FooterProps {
   business: Business
@@ -173,7 +172,7 @@ const Footer = function Footer({ business }: FooterProps) {
               </Link>
 
               <Link
-                href='https://wa.me/+8801855375963'
+                href='https://wa.me/+8801910605557'
                 target='_blank'
                 rel='noopener noreferrer'
                 className='hover:text-red-600 transition-colors'

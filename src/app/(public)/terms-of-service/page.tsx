@@ -241,7 +241,7 @@ export default function TermsPage() {
               support@rimsheavencom
             </a>
             <a
-              href="tel:+8801855375963"
+              href="tel:+8801910605557"
               className="bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-lg px-6 py-3 transition-all duration-300 flex items-center gap-2"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

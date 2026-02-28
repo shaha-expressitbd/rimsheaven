@@ -85,7 +85,7 @@ export default async function PublicLayout({
       <DynamicFooter business={business} />
       {/* Floating Icons - only on home and products pages */}
       <DynamicFloatingIcons />
-      <StickySocialButton phoneNumber='+8801855375963' />
+      <StickySocialButton phoneNumber='+8801910605557' />
     </div>
   )
 }

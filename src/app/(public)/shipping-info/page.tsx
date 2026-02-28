@@ -194,7 +194,7 @@ export default function ShippingInfoPage() {
                     <h3 className="font-semibold">Phone Support</h3>
                   </div>
                   <a
-                    href="tel:01855375963"
+                    href="tel:01910605557"
                     className="text-red-100 hover:text-white transition-colors duration-300 underline decoration-red-300 hover:decoration-white"
                   >
                     01855-375963

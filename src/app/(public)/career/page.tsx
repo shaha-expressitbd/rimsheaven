@@ -220,7 +220,7 @@ export default function CareersPage() {
                             </a>
 
                             <a
-                                href="tel:+8801855375963"
+                                href="tel:+8801910605557"
                                 className="bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white px-6 py-3 rounded-lg font-semibold transition-colors duration-300 flex items-center gap-2 text-sm "
                             >
                                 <svg

@@ -639,7 +639,7 @@ const SupportPage = () => {
                     </p>
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
                         <a
-                            href="tel:+8801855375963"
+                            href="tel:+8801910605557"
                             className="bg-primary hover:bg-secondary text-white px-8 py-3 rounded-lg font-semibold flex items-center gap-2 transition-colors"
                         >
                             <BiPhone className="w-5 h-5" />
