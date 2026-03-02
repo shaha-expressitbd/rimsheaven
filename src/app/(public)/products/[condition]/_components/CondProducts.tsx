@@ -1,11 +1,11 @@
 "use client";
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import ProductGridSkeleton from "@/components/ui/skeleton/ProductGridSkeleton";
+import { useGetProductsQuery } from "@/lib/api/publicApi";
 import { Product } from "@/types/product";
 import { useParams, useRouter } from "next/navigation";
+import { useCallback, useEffect, useRef, useState } from "react";
 import ConditionTabBar from "./ConditionTabBar";
 import ProductGrid from "./ProductGrid";
-import { useGetProductsQuery } from "@/lib/api/publicApi";
-import ProductGridSkeleton from "@/components/ui/skeleton/ProductGridSkeleton";
 
 const productConditionOptions = [
   { value: "best", label: "Best" },
@@ -29,7 +29,9 @@ const productConditionOptions = [
 export default function ConditionProducts() {
   const router = useRouter();
   const params = useParams();
-  const initialSearch = (params?.condition as string) || "all";
+  const initialSearch = params?.condition
+    ? decodeURIComponent(params.condition as string)
+    : "all";
   const [selected, setSelected] = useState<string>(initialSearch);
 
   const [products, setProducts] = useState<Product[]>([]);
@@ -42,13 +44,16 @@ export default function ConditionProducts() {
   // Page 1: Initial load
   const {
     data: currentProducts,
-    isLoading: isInitialLoading,
+    isFetching: isInitialFetching,
     error: initialError,
-  } = useGetProductsQuery({
-    search: selected,
-    page: 1,
-    limit: 10,
-  });
+  } = useGetProductsQuery(
+    {
+      condition: selected,
+      page: 1,
+      limit: 10,
+    },
+    { refetchOnMountOrArgChange: true },
+  );
 
   // Page n+1: Infinite scroll
   const {
@@ -57,13 +62,13 @@ export default function ConditionProducts() {
     error: moreError,
   } = useGetProductsQuery(
     {
-      search: selected,
+      condition: selected,
       page: page + 1,
       limit: 10,
     },
     {
       skip: !hasMore || isLoadingMore || page === 0,
-    }
+    },
   );
 
   // Set initial products (page 1)
@@ -106,7 +111,7 @@ export default function ConditionProducts() {
           loadMoreProducts();
         }
       },
-      { threshold: 1.0 }
+      { threshold: 1.0 },
     );
 
     const currentRef = observerRef.current;
@@ -119,16 +124,21 @@ export default function ConditionProducts() {
 
   // Tab change handler
   const handleTabChange = (tab: string) => {
+    if (tab === selected) return;
+
     setSelected(tab);
     setProducts([]);
     setPage(1);
     setHasMore(true);
+    setIsLoadingMore(false);
     router.replace(`/products/${tab}`, { scroll: false });
   };
 
   // Sync URL param with selected tab
   useEffect(() => {
-    const currentParam = params?.condition as string;
+    const currentParam = params?.condition
+      ? decodeURIComponent(params.condition as string)
+      : "";
     if (currentParam && currentParam !== selected) {
       setSelected(currentParam);
       setProducts([]);
@@ -146,15 +156,19 @@ export default function ConditionProducts() {
       />
 
       {/* Initial Loading */}
-      {isInitialLoading && <ProductGridSkeleton count={10} />}
+      {isInitialFetching && products.length === 0 && (
+        <ProductGridSkeleton count={10} />
+      )}
 
       {/* Product Grid */}
-      {!isInitialLoading && (
-        <ProductGrid
-          products={products}
-          isLoadingMore={isLoadingMore}
-          observerRef={observerRef}
-        />
+      {!(isInitialFetching && products.length === 0) && (
+        <div className="md:mt-20 mt-4">
+          <ProductGrid
+            products={products}
+            isLoadingMore={isLoadingMore}
+            observerRef={observerRef}
+          />
+        </div>
       )}
 
       {/* Error */}
@@ -165,14 +179,14 @@ export default function ConditionProducts() {
       )}
 
       {/* No more products */}
-      {!hasMore && products.length > 0 && !isInitialLoading && (
+      {!hasMore && products.length > 0 && !isInitialFetching && (
         <div className="text-center text-gray-500 py-8">
           <p>You've reached the end of the products.</p>
         </div>
       )}
 
       {/* Empty state */}
-      {products.length === 0 && !isInitialLoading && !initialError && (
+      {products.length === 0 && !isInitialFetching && !initialError && (
         <div className="text-center text-gray-500 py-16">
           <p>No products found for "{selected}".</p>
         </div>

@@ -1,8 +1,8 @@
 // components/ConditionTabBar.tsx
 "use client";
 
-import React, { useRef, useEffect, useState, useCallback } from "react";
-import { BiLeftArrow, BiRightArrow } from "react-icons/bi";
+import React, { useState } from "react";
+import { FiFilter, FiX } from "react-icons/fi";
 
 interface ConditionTabBarProps {
   options: { value: string; label: string }[];
@@ -15,130 +15,80 @@ const ConditionTabBar: React.FC<ConditionTabBarProps> = ({
   selected,
   onTabChange,
 }) => {
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const tabRefs = useRef<{ [key: string]: HTMLButtonElement | null }>({});
-  const [showLeftArrow, setShowLeftArrow] = useState(false);
-  const [showRightArrow, setShowRightArrow] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
 
-  // সিলেক্টেড ট্যাবকে মাঝে আনা (SSR-সেফ)
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-
-    const selectedTab = tabRefs.current[selected];
-    if (selectedTab && scrollRef.current) {
-      selectedTab.scrollIntoView({
-        behavior: "smooth",
-        block: "nearest",
-        inline: "center",
-      });
-    }
-  }, [selected]);
-
-  // অ্যারো দেখানো/লুকানো চেক (SSR + Resize + Scroll)
-  const updateArrows = useCallback(() => {
-    if (!scrollRef.current || typeof window === "undefined") return;
-
-    const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
-    const threshold = 5;
-
-    setShowLeftArrow(scrollLeft > threshold);
-    setShowRightArrow(scrollLeft < scrollWidth - clientWidth - threshold);
-  }, []);
-
-  useEffect(() => {
-    updateArrows(); // Initial check
-
-    const container = scrollRef.current;
-    if (!container) return;
-
-    const handleScroll = () => updateArrows();
-    const handleResize = () => updateArrows();
-
-    container.addEventListener("scroll", handleScroll);
-    window.addEventListener("resize", handleResize);
-
-    // Initial check after mount
-    const raf = requestAnimationFrame(() => updateArrows());
-
-    return () => {
-      container.removeEventListener("scroll", handleScroll);
-      window.removeEventListener("resize", handleResize);
-      cancelAnimationFrame(raf);
-    };
-  }, [options.length, updateArrows]);
-
-  // ম্যানুয়াল স্ক্রল (SSR-সেফ)
-  const scroll = (direction: "left" | "right") => {
-    if (!scrollRef.current || typeof window === "undefined") return;
-
-    const scrollAmount = 220;
-    scrollRef.current.scrollBy({
-      left: direction === "left" ? -scrollAmount : scrollAmount,
-      behavior: "smooth",
-    });
+  const handleSelect = (val: string) => {
+    onTabChange(val);
+    setIsOpen(false);
   };
 
   return (
-    <div className="flex flex-col items-center my-2 md:mt-20">
-      {/* Full Slider Container */}
-      <div className="relative w-full max-w-7xl mx-auto">
-        {/* Left Arrow */}
-        <button
-          onClick={() => scroll("left")}
-          className={`absolute left-0 top-1/2 -translate-y-1/2 z-30 p-2.5 bg-white dark:bg-gray-800 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-110 ${showLeftArrow
-            ? "opacity-100 pointer-events-auto"
-            : "opacity-0 pointer-events-none"
-            }`}
-          aria-label="Scroll left"
-        >
-          <BiLeftArrow className="w-5 h-5 text-gray-700 dark:text-gray-200" />
-        </button>
+    <>
+      {/* Floating Button on the Right */}
+      <button
+        onClick={() => setIsOpen(true)}
+        className="fixed top-1/2 right-0 -translate-y-1/2 z-40 bg-primary text-white p-3 rounded-l-full shadow-xl hover:scale-105 transition-transform duration-300 flex items-center gap-2 group"
+        aria-label="Open Conditions Filter"
+      >
+        <div className="flex flex-col items-center">
+          <FiFilter className="w-6 h-6 animate-pulse group-hover:animate-none" />
+          <span className="text-[10px] font-bold mt-1 uppercase tracking-wider hidden md:block">
+            Filter
+          </span>
+        </div>
+      </button>
 
-        {/* Scrollable Tabs */}
+      {/* Background Overlay */}
+      {isOpen && (
         <div
-          ref={scrollRef}
-          className="flex gap-3 overflow-x-auto px-[56px] py-2 scrollbar-hide scroll-smooth"
-          style={{
-            scrollSnapType: "x mandatory",
-            scrollPadding: "0 1rem",
-          }}
-        >
-          {options
-            .filter((o) => o.value)
-            .map((opt) => (
-              <button
-                key={opt.value}
-                ref={(el) => { tabRefs.current[opt.value] = el; }}
-                onClick={() => onTabChange(opt.value)}
-                className={`
-                  px-5 py-2.5 rounded-full text-sm font-medium capitalize whitespace-nowrap
-                  transition-all duration-300 transform hover:scale-105
-                  flex-shrink-0 min-w-fit
-                  scroll-snap-align-center
-                  ${selected === opt.value
-                    ? "bg-primary text-white shadow-lg ring-2 ring-primary/30"
-                    : "bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600"
-                  }
-                `}
-              >
-                {opt.label}
-              </button>
-            ))}
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 transition-opacity"
+          onClick={() => setIsOpen(false)}
+        />
+      )}
+
+      {/* Sliding Sidebar */}
+      <div
+        className={`fixed top-0 right-0 h-full w-72 sm:w-80 bg-white dark:bg-gray-900 shadow-2xl z-50 transform transition-transform duration-500 ease-in-out flex flex-col ${
+          isOpen ? "translate-x-0" : "translate-x-full"
+        }`}
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between p-5 border-b border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50">
+          <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100 flex items-center gap-2">
+            <FiFilter className="text-primary" />
+            Conditions
+          </h2>
+          <button
+            onClick={() => setIsOpen(false)}
+            className="p-2 bg-gray-200 dark:bg-gray-700 hover:bg-red-100 dark:hover:bg-red-900/40 hover:text-red-600 rounded-full transition-colors"
+          >
+            <FiX className="w-5 h-5" />
+          </button>
         </div>
 
-        {/* Right Arrow */}
-        <button
-          onClick={() => scroll("right")}
-          className={`absolute right-0 top-1/2 -translate-y-1/2 z-30 p-2.5 bg-white dark:bg-gray-800 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-110 ${showRightArrow
-            ? "opacity-100 pointer-events-auto"
-            : "opacity-0 pointer-events-none"
-            }`}
-          aria-label="Scroll right"
-        >
-          <BiRightArrow className="w-5 h-5 text-gray-700 dark:text-gray-200" />
-        </button>
+        {/* Options List */}
+        <div className="flex-1 overflow-y-auto p-4 space-y-2 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600">
+          {options
+            .filter((o) => o.value)
+            .map((opt) => {
+              const isSelected = selected === opt.value;
+              return (
+                <button
+                  key={opt.value}
+                  onClick={() => handleSelect(opt.value)}
+                  className={`w-full text-left px-4 py-3 rounded-xl text-sm font-semibold capitalize transition-all duration-300 border-2 ${
+                    isSelected
+                      ? "bg-primary text-white border-primary shadow-md translate-x-1"
+                      : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-transparent hover:border-primary/30 hover:bg-blue-50 dark:hover:bg-gray-700"
+                  }`}
+                >
+                  {opt.label}
+                </button>
+              );
+            })}
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 

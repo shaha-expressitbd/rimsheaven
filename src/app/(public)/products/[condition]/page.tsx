@@ -1,6 +1,6 @@
 // app/products/condition/[condition]/page.tsx
-import ConditionProducts from "./_components/CondProducts";
 import { Metadata } from "next";
+import ConditionProducts from "./_components/CondProducts";
 
 interface PageParams {
   condition: string;
@@ -13,8 +13,8 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { condition } = await params;
   const formatted = condition ? condition.replace(/-/g, " ") : "Products";
-  const title = `${formatted.charAt(0).toUpperCase() + formatted.slice(1)} | G'Lore`;
-  const description = `Browse our ${formatted} collection and find the best deals on G'Lore.`;
+  const title = `${formatted.charAt(0).toUpperCase() + formatted.slice(1)} | Rim's heaven`;
+  const description = `Browse our ${formatted} collection and find the best deals on Rim's heaven.`;
 
   return {
     title,
@@ -28,7 +28,11 @@ export async function generateMetadata({
   };
 }
 
-export default async function Page({ params }: { params: Promise<PageParams> }) {
+export default async function Page({
+  params,
+}: {
+  params: Promise<PageParams>;
+}) {
   const { condition } = await params;
 
   if (!condition) {

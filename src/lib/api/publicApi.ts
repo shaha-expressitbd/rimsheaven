@@ -105,6 +105,7 @@ export const publicApi = createApi({
         limit?: number;
         _id?: string;
         category?: string;
+        condition?: string;
       }>
     >({
       query: (params = {}) => {
@@ -265,7 +266,7 @@ export const publicApi = createApi({
       transformResponse: (res: FilterOptionsResponse) => {
         const data = res.data.reduce(
           (acc, item) => ({ ...acc, ...item }),
-          {} as any
+          {} as any,
         );
         return data as FilterOptions;
       },
